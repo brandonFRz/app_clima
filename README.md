@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Weather Forecast Application 🌦️
 
-## Getting Started
+## Descripción
 
-First, run the development server:
+Esta es una aplicación de pronóstico del tiempo desarrollada con **Next.js** y **Axios**. La aplicación permite a los usuarios obtener el clima actual y el pronóstico de los próximos 5 días para cualquier ciudad del mundo, utilizando la API de OpenWeatherMap.
+
+## Características
+
+- 🌍 **Clima actual**: Muestra la temperatura, la sensación térmica, la humedad, y la velocidad del viento de la ciudad seleccionada.
+- 📅 **Pronóstico de 5 días**: Proporciona el pronóstico del clima para los próximos 5 días, incluyendo la descripción del clima y la temperatura.
+- 🔍 **Búsqueda de ciudades**: Permite a los usuarios buscar el clima de cualquier ciudad.
+- 📍 **Detección de ubicación**: Utiliza la geolocalización para obtener automáticamente el clima de la ubicación actual del usuario.
+
+## Tecnologías Utilizadas
+
+- [Next.js](https://nextjs.org/) - Framework de React para aplicaciones web.
+- [Axios](https://axios-http.com/) - Cliente HTTP para hacer solicitudes a la API.
+- [OpenWeatherMap API](https://openweathermap.org/api) - API para obtener datos meteorológicos.
+
+## Instalación y Uso
+
+Sigue estos pasos para instalar y ejecutar la aplicación en tu entorno local:
+
+### 1. Clona el repositorio
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/tu-usuario/weather-forecast-app.git
+cd weather-forecast-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Instala las dependencias
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configura las variables de entorno
+```bash
+NEXT_PUBLIC_OPENWEATHER_API_KEY=tu_api_key_aqui
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### 4. Inicia la aplicación
+```bash
+npm run dev
+```
+Luego abre http://localhost:3000 en tu navegador para ver la aplicación.
 
-## Learn More
+## Vista Previa
+Aquí hay una vista previa de cómo se ve la aplicación:
 
-To learn more about Next.js, take a look at the following resources:
+<img src="https://github.com/user-attachments/assets/b51d0b60-764c-402a-b5d5-a5b84563c444" alt="clima" width="500"/>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
