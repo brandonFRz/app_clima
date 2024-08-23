@@ -1,72 +1,87 @@
-import { useState, useEffect } from "react";
-import { fetchCurrentWeather,fetchForecast,fetchCityByCoordinates,} from "../utils/api";
-import { CurrentWeatherData,ForecastData, ForecastDay,} from "../types/weather";
+import { useState, useEffect, useCallback } from "react";
+import {
+  fetchCurrentWeather,
+  fetchForecast,
+  fetchCityByCoordinates,
+} from "../utils/api";
+import {
+  CurrentWeatherData,
+  ForecastData,
+  ForecastDay,
+} from "../types/weather";
 
 export function useWeather() {
-  //Estado que almacenar los datos del clima actual.
+  // Estado para almacenar el clima actual, el pronóstico, la ciudad, la ubicación, el estado de carga y posibles errores.
   const [currentWeather, setCurrentWeather] =
     useState<CurrentWeatherData | null>(null);
-  //Estado que almacenar los datos del clima de los próximos días.
   const [forecast, setForecast] = useState<ForecastData | null>(null);
-  //Estado que alacena el nombre de la ciudad.
   const [city, setCity] = useState<string>("");
-  //Estado que almacena la ubicación geográfica en base a la latitud y longitud.
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null
   );
-  //Estado que maneja los estados de carga.
   const [loading, setLoading] = useState<boolean>(true);
-  //Estado que maneja los errores en la obtención de datos
   const [error, setError] = useState<Error | null>(null);
 
-  //Hook que obtiene la ubicación del usuario cuando el componente se monta.
+  // Efecto para obtener la ubicación actual del usuario al cargar la página.
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude } = position.coords;
-        setLocation({ lat: latitude, lon: longitude });
+        setLocation({ lat: latitude, lon: longitude }); // Guardar las coordenadas de la ubicación.
       });
     }
   }, []);
 
-  //Hook que obtiene el clima actual y en los próximos días en base a la ubicación.
-  useEffect(() => {
-    if (location) {
-      setLoading(true);
-      fetchCityByCoordinates(location.lat, location.lon)
-        .then((defaultCity) => {
-          fetchCurrentWeather(defaultCity)
-            .then((data) => setCurrentWeather(data))
-            .catch((error) => setError(error));
-          fetchForecast(defaultCity)
-            .then((data) => setForecast(data))
-            .catch((error) => setError(error));
-        })
-        .catch((error) => setError(error.message))
-        .finally(() => setLoading(false));
+  // Función para obtener el clima actual y el pronóstico para una ciudad específica.
+  async function fetchWeatherDataByCity(city: string) {
+    try {
+      setError(null);
+      const [CurrentWeatherData, forecastData] = await Promise.all([
+        fetchCurrentWeather(city),
+        fetchForecast(city),
+      ]);
+      setCurrentWeather(CurrentWeatherData);
+      setForecast(forecastData);
+    } catch (error: any) {
+      setError(error.message || "Error buscando los datos del clima");
+    } finally {
+      setLoading(false);
     }
-  }, [location]);
-
-  //Función que maneja los cambios de la ciudad ingresada por el usuario.
-  function handleCityChange() {
-    setLoading(true);
-    setError(null);
-    fetchCurrentWeather(city)
-      .then((data) => setCurrentWeather(data))
-      .catch((error) => setError(error.message))
-      .finally(() => setLoading(false));
-    fetchForecast(city)
-      .then((data) => setForecast(data))
-      .catch((error) => setError(error.message))
-      .finally(() => setLoading(false));
   }
 
-  //Función para obtener el pronostico diario basado en los datos recibidos.
+  // Función para obtener el clima y el pronóstico según la ubicación actual del usuario.
+  const fetchWeatherDataByLocation = useCallback(
+    async (lat: number, lon: number) => {
+      try {
+        setLoading(true);
+        const cityName = await fetchCityByCoordinates(lat, lon);
+        await fetchWeatherDataByCity(cityName);
+      } catch (error: any) {
+        setError(error.message || "Error buscando los datos del clima");
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  // Efecto para obtener el clima y el pronóstico cuando se obtiene la ubicación.
+  useEffect(() => {
+    if (location) {
+      fetchWeatherDataByLocation(location.lat, location.lon);
+    }
+  }, [location, fetchWeatherDataByLocation]);
+
+  // Función para manejar cambios en la ciudad seleccionada por el usuario.
+  function handleCityChange() {
+    fetchWeatherDataByCity(city);
+  }
+
+  // Función para obtener los pronósticos diarios.
   function getDailyForecasts(forecastData: ForecastData): ForecastDay[] {
-    const dailyForecasts: ForecastDay[] = [];
     const forecastMap = new Map<string, ForecastDay>();
 
-    // Mapea los datos del pronóstico agrupándolos por fecha
+    // Iterar sobre la lista de pronósticos y guardar los pronósticos por día.
     forecastData.list.forEach((entry) => {
       const date = new Date(entry.dt * 1000).toLocaleDateString("es-ES");
       if (!forecastMap.has(date)) {
@@ -74,15 +89,11 @@ export function useWeather() {
       }
     });
 
-    // Convierte el mapa en un array y lo recorta a los primeros 5 días
-    forecastMap.forEach((value) => {
-      dailyForecasts.push(value);
-    });
-
-    return dailyForecasts.slice(0, 5);
+    // Retornar los primeros 5 días.
+    return Array.from(forecastMap.values()).slice(0, 5);
   }
 
-  //Retorna los valores y las funciones que estaran disponibles para los componentes que las usen.
+  // Retornar el estado y funciones para ser utilizados en los componentes.
   return {
     currentWeather,
     forecast,

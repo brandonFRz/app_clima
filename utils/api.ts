@@ -8,6 +8,11 @@ if (!API_KEY) {
   throw new Error("No se encuentra api key de OpenWeather ");
 }
 
+function handleApiError(error:any):string{
+  console.error('Error al buscar la información', error)
+  return('Hubo un problema al intentar buscar los datos del clima. Por favor intente nuevamente.')
+}
+
 //Función para obtener el clima actual de una ciudad especifica.
 export async function fetchCurrentWeather(city: string) {
   try {
@@ -15,8 +20,7 @@ export async function fetchCurrentWeather(city: string) {
   const response = await axios.get(url);
   return response.data;
   }catch(error){
-    console.error('Error buscando la información:', error);
-    throw error;
+    throw new Error(handleApiError(error));
   }
 };
 
@@ -27,8 +31,7 @@ export async function fetchForecast(city: string) {
   const response = await axios.get(url);
   return response.data;
 } catch (error) {
-  console.error('Error buscando la información:', error);
-  throw error; 
+  throw new Error(handleApiError(error));
 }
 };
 
@@ -39,7 +42,7 @@ export async function fetchCityByCoordinates(lat: number, lon: number) {
   const response = await axios.get(url);
   return response.data.name;
   } catch (error) {
-    console.error('Error buscando la información:', error);
-    throw error;
+    throw new Error(handleApiError(error));
   }
 };
+
